@@ -13,7 +13,7 @@ import java.util.Scanner;
  * of a given number of days after the current date.
  *
  * @author Winston Riggs
- * @version 1.2
+ * @version 1.2.1
  */
 
 public class Covid {
@@ -27,14 +27,15 @@ public class Covid {
             int lengthOfProjection;
 
             //Gets the date of the previous day as the api is one day behind
-            LocalDateTime now = LocalDateTime.of(2020, 8, 18, 11, 57);
+            LocalDateTime now = LocalDateTime.of(2021, 3, 1, 12, 00);
             Scanner keyboard = new Scanner(System.in);
             String state;
 
             //Asks user about location desired
-            System.out.println("Would you like to view data for a state or the country? \n(For country type \"US\" and the two digit symbol for a state ex. \"NY\")");
+            System.out.println("Would you like to view data for a state or the country? \n(For the country type \"US\" and the two digit symbol for a state ex. \"NY\")");
             state = keyboard.nextLine();
 
+            //Checks to see if the input is valid
             while(!isStateValid(state)) {
                 System.out.println("Sorry. That is not a valid input. Please try again.");
                 state = keyboard.nextLine();
@@ -44,6 +45,7 @@ public class Covid {
             System.out.println("Would you like to view new cases per day or total cases? \n0 - New Cases \n1 - Active Cases");
             dataTypeInput = keyboard.nextLine();
 
+            //Checks to see if the input is valid
             while (!dataTypeInput.equals("0") && !dataTypeInput.equals("1")) {
                 System.out.println("Sorry. That is not a valid input. Please try again.");
                 dataTypeInput = keyboard.nextLine();
@@ -53,11 +55,18 @@ public class Covid {
 
             //Asks user about the projection feature
             System.out.println("How many days of projections would you like?");
+
+            //Checks to see if the input is valid
+            while(!keyboard.hasNextInt()) {
+                System.out.println("Sorry. That is not a valid input. Please try again.");
+                keyboard.next();
+            }
+
             lengthOfProjection = keyboard.nextInt();
 
             keyboard.close();
 
-            System.out.println("Please Wait. Fetching Data . . .");
+            System.out.println("Please Wait. Fetching Data . . . (Allow up to 60 seconds)");
 
             //Sorts data from the api into an ArrayList
             for (int i = 0; i < 150; i++) {
@@ -81,20 +90,18 @@ public class Covid {
             //Sorts the projection into an ArrayList
             ArrayList<Integer> projection = getProjection(startVal, lengthOfProjection, curChange, constantChange);
 
-            LocalDateTime time = LocalDateTime.now().minusDays(61);
-
             //Prints out the real covid-19 data
             for (int i : dataVal) {
-                System.out.println(formatDateForUser(time) + ": " + generateGraph(i, scale));
-                time = time.plusDays(1);
+                System.out.println(formatDateForUser(now) + ": " + generateGraph(i, scale));
+                now = now.plusDays(1);
             }
 
             System.out.println("----------------------------------------");
 
             //Prints out the projection data
             for (int i : projection) {
-                System.out.println(formatDateForUser(time) + ": " + generateGraph(i, scale));
-                time = time.plusDays(1);
+                System.out.println(formatDateForUser(now) + ": " + generateGraph(i, scale));
+                now = now.plusDays(1);
             }
 
             String typeOfData;
@@ -169,6 +176,9 @@ public class Covid {
 
             curChange += secChange;
         }
+
+        while (projection.size() > size)
+            projection.remove(projection.size() - 1);
 
         return projection;
     }
